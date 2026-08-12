@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Digital Library – Your Public Services Assistant</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --neon-blue:   #00d4ff;
+      --neon-purple: #b44fff;
+      --neon-green:  #00ffb3;
+      --neon-pink:   #ff2d78;
+      --neon-amber:  #ffb300;
+      --glass-bg:    rgba(8, 10, 22, 0.82);
+      --glass-border:rgba(255,255,255,0.07);
+      --card-bg:     rgba(12, 15, 30, 0.88);
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #2a2f5a; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--neon-blue); }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      background: #04050f;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* ── Animated aurora background ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 10% 20%,  rgba(0,80,180,0.28) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 90% 10%,  rgba(120,0,200,0.22) 0%, transparent 55%),
+        radial-gradient(ellipse 70% 55% at 50% 90%,  rgba(0,180,120,0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 80% 70%,  rgba(200,0,80,0.15)  0%, transparent 55%),
+        radial-gradient(ellipse 90% 80% at 30% 60%,  rgba(0,30,80,0.5)    0%, transparent 70%);
+      background-color: #04050f;
+      animation: auroraShift 20s ease-in-out infinite alternate;
+      z-index: 0;
+      pointer-events: none;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.12) 0%, transparent 100%),
+        radial-gradient(1px 1px at 60% 70%, rgba(255,255,255,0.08) 0%, transparent 100%),
+        radial-gradient(1px 1px at 80% 20%, rgba(255,255,255,0.10) 0%, transparent 100%),
+        radial-gradient(1px 1px at 40% 80%, rgba(255,255,255,0.06) 0%, transparent 100%);
+      z-index: 0;
+      pointer-events: none;
+    }
+    @keyframes auroraShift {
+      0%   { filter: hue-rotate(0deg)   brightness(1);   }
+      50%  { filter: hue-rotate(30deg)  brightness(1.1); }
+      100% { filter: hue-rotate(-20deg) brightness(0.95);}
+    }
+
+    header, .container, footer { position: relative; z-index: 1; }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, rgba(10,15,40,0.97), rgba(20,10,50,0.97));
+      padding: 18px 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 4px;
+      border-bottom: 1px solid rgba(0,212,255,0.2);
+      box-shadow: 0 4px 30px rgba(0,0,0,0.6), 0 0 60px rgba(0,80,200,0.12);
+      position: relative;
+    }
+    header .logo { font-size: 38px; filter: drop-shadow(0 0 10px rgba(0,212,255,0.6)); }
+    header h1 {
+      font-size: 30px; font-weight: 800; color: #fff; letter-spacing: 2px;
+      background: linear-gradient(90deg, #00d4ff, #b44fff, #ff2d78);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 12px rgba(0,212,255,0.3));
+    }
+    header p { font-size: 13px; color: #7dd3fc; letter-spacing: 0.5px; }
+    header .wiki-link {
+      position: absolute;
+      right: 24px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 10px;
+      padding: 8px 14px;
+      text-decoration: none;
+      color: #e2e8f0;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.25s;
+      white-space: nowrap;
+      backdrop-filter: blur(8px);
+    }
+    header .wiki-link:hover {
+      background: rgba(0,212,255,0.15);
+      border-color: var(--neon-blue);
+      box-shadow: 0 0 14px rgba(0,212,255,0.3);
+      color: var(--neon-blue);
+    }
+
+    /* ── Layout ── */
+    .container {
+      display: flex;
+      flex: 1;
+      max-width: 1240px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 24px 20px;
+      gap: 22px;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 268px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .sidebar h2 {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: rgba(0,212,255,0.6);
+      margin-bottom: 2px;
+      padding-left: 4px;
+    }
+
+    .category-card {
+      background: var(--card-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 13px 16px;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    }
+    .category-card:hover {
+      transform: translateX(6px) scale(1.01);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+    }
+    .category-card .icon { font-size: 22px; flex-shrink: 0; }
+    .category-card .label { font-size: 13px; font-weight: 700; letter-spacing: 0.3px; }
+    .category-card .sub   { font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+
+    /* ── Main Chat ── */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Quick chips */
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .chip {
+      background: rgba(0,212,255,0.07);
+      border: 1px solid rgba(0,212,255,0.2);
+      border-radius: 20px;
+      padding: 6px 15px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: #a5d8ff;
+      backdrop-filter: blur(6px);
+    }
+    .chip:hover {
+      background: rgba(0,212,255,0.18);
+      border-color: var(--neon-blue);
+      color: var(--neon-blue);
+      box-shadow: 0 0 12px rgba(0,212,255,0.25);
+      transform: translateY(-1px);
+    }
+
+    /* Chat window */
+    .chat-window {
+      flex: 1;
+      background: rgba(4, 5, 18, 0.82);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(0,212,255,0.12);
+      border-radius: 18px;
+      padding: 20px;
+      overflow-y: auto;
+      min-height: 380px;
+      max-height: 460px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 4px 30px rgba(0,0,0,0.5);
+    }
+
+    .message {
+      display: flex;
+      gap: 10px;
+      animation: fadeIn 0.35s ease;
+    }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+    .message.user  { flex-direction: row-reverse; }
+    .avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+      box-shadow: 0 0 12px rgba(0,0,0,0.4);
+    }
+    .message.bot  .avatar { background: linear-gradient(135deg, #1d4ed8, #7c3aed); box-shadow: 0 0 14px rgba(99,102,241,0.4); }
+    .message.user .avatar { background: linear-gradient(135deg, #0f766e, #0891b2); box-shadow: 0 0 14px rgba(8,145,178,0.4); }
+
+    .bubble {
+      max-width: 75%;
+      padding: 12px 16px;
+      border-radius: 18px;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+    .message.bot  .bubble {
+      background: rgba(8,12,35,0.9);
+      border: 1px solid rgba(99,102,241,0.2);
+      border-top-left-radius: 4px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.3);
+    }
+    .message.user .bubble {
+      background: linear-gradient(135deg, #1d4ed8, #4f46e5);
+      border-top-right-radius: 4px;
+      box-shadow: 0 2px 16px rgba(79,70,229,0.35);
+    }
+
+    .bubble a { color: var(--neon-blue); text-decoration: underline; }
+    .bubble ul { padding-left: 18px; margin-top: 6px; }
+    .bubble li { margin-bottom: 4px; }
+
+    /* Resource cards inside bubble */
+    .resource-card {
+      background: rgba(12,18,45,0.95);
+      border: 1px solid rgba(99,102,241,0.2);
+      border-radius: 12px;
+      padding: 10px 14px;
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: border-color 0.2s;
+    }
+    .resource-card:hover { border-color: var(--neon-blue); }
+    .resource-card .rc-icon { font-size: 20px; }
+    .resource-card .rc-title { font-size: 13px; font-weight: 600; color: #e2e8f0; }
+    .resource-card .rc-desc  { font-size: 11px; color: #64748b; }
+    .resource-card a { font-size: 12px; color: var(--neon-blue); margin-top: 4px; display: inline-block; }
+
+    /* Typing indicator */
+    .typing .bubble { display: flex; align-items: center; gap: 5px; padding: 14px 18px; }
+    .dot { width: 8px; height: 8px; background: #4f46e5; border-radius: 50%; animation: bounce 1.2s infinite; }
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-7px)} }
+
+    /* Input bar */
+    .input-bar {
+      display: flex;
+      gap: 10px;
+      background: rgba(8,12,35,0.9);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(0,212,255,0.2);
+      border-radius: 16px;
+      padding: 10px 14px;
+      align-items: center;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .input-bar:focus-within {
+      border-color: var(--neon-blue);
+      box-shadow: 0 0 20px rgba(0,212,255,0.15);
+    }
+    .input-bar input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #e2e8f0;
+      font-size: 15px;
+      font-family: inherit;
+    }
+    .input-bar input::placeholder { color: #334155; }
+    .send-btn {
+      background: linear-gradient(135deg, #1d4ed8, #7c3aed);
+      border: none;
+      border-radius: 12px;
+      padding: 9px 20px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 0 14px rgba(99,102,241,0.35);
+      font-family: inherit;
+    }
+    .send-btn:hover { transform: scale(1.04); box-shadow: 0 0 22px rgba(99,102,241,0.55); }
+    .send-btn:disabled { background: #1e293b; box-shadow: none; cursor: not-allowed; transform: none; }
+
+    /* Stats bar */
+    .stats { display: flex; gap: 10px; flex-wrap: wrap; }
+    .stat-box {
+      flex: 1;
+      min-width: 100px;
+      background: rgba(8,12,35,0.85);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(0,212,255,0.15);
+      border-radius: 14px;
+      padding: 14px;
+      text-align: center;
+      transition: border-color 0.2s;
+    }
+    .stat-box:hover { border-color: var(--neon-blue); }
+    .stat-box .num { font-size: 22px; font-weight: 800; color: var(--neon-blue); }
+    .stat-box .lbl { font-size: 10px; color: #475569; margin-top: 2px; letter-spacing: 0.5px; }
+
+    /* ── Opportunities category highlight ── */
+    .category-card.opps-card {
+      background: linear-gradient(135deg, #001a0e, #003a1e);
+      border-color: rgba(0,255,179,0.4);
+    }
+    .category-card.opps-card:hover {
+      background: linear-gradient(135deg, #003a1e, #005030);
+      border-color: var(--neon-green);
+      box-shadow: 0 0 22px rgba(0,255,179,0.2);
+      transform: translateX(6px) scale(1.01);
+    }
+
+    /* ── Opportunities panel ── */
+    .opps-panel {
+      display: none;
+      background: rgba(4,14,10,0.94);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(0,255,179,0.2);
+      border-radius: 18px;
+      padding: 20px;
+      animation: fadeIn 0.3s ease;
+      box-shadow: 0 0 40px rgba(0,255,179,0.06);
+    }
+    .opps-panel.open { display: block; }
+
+    .opps-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .opps-header h3 { font-size: 15px; color: #34d399; font-weight: 700; }
+    .opps-header span { font-size: 11px; color: #6ee7b7; background: #064e3b; padding: 4px 10px; border-radius: 20px; }
+
+    .opps-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .opps-tab {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid #134e4a;
+      color: #6ee7b7;
+      background: transparent;
+      transition: all 0.2s;
+    }
+    .opps-tab.active, .opps-tab:hover {
+      background: #10b981;
+      color: #fff;
+      border-color: #10b981;
+    }
+
+    .opps-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 900px) { .opps-grid { grid-template-columns: 1fr; } }
+
+    .opp-card {
+      background: rgba(4,14,10,0.9);
+      border: 1px solid rgba(0,255,179,0.12);
+      border-radius: 14px;
+      padding: 14px;
+      transition: all 0.2s;
+    }
+    .opp-card:hover { border-color: #00ffb3; box-shadow: 0 0 16px rgba(0,255,179,0.12); transform: translateY(-2px); }
+    .opp-card-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .opp-icon { font-size: 22px; flex-shrink: 0; }
+    .opp-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-left: auto;
+      white-space: nowrap;
+    }
+    .badge-new  { background: #064e3b; color: #34d399; border: 1px solid #10b981; }
+    .badge-hot  { background: #450a0a; color: #f87171; border: 1px solid #ef4444; }
+    .badge-free { background: #1e3a8a; color: #93c5fd; border: 1px solid #3b82f6; }
+    .badge-open { background: #3b0764; color: #d8b4fe; border: 1px solid #a855f7; }
+
+    .opp-title { font-size: 13px; font-weight: 700; color: #e2e8f0; margin-bottom: 4px; }
+    .opp-desc  { font-size: 11px; color: #94a3b8; line-height: 1.5; margin-bottom: 8px; }
+    .opp-links { display: flex; gap: 8px; flex-wrap: wrap; }
+    .opp-links a {
+      font-size: 11px;
+      color: #34d399;
+      text-decoration: none;
+      border: 1px solid #134e4a;
+      border-radius: 8px;
+      padding: 3px 10px;
+      transition: all 0.2s;
+    }
+    .opp-links a:hover { background: #10b981; color: #fff; border-color: #10b981; }
+
+    /* ── Per-category colours ── */
+    .cat-healthcare  { background: linear-gradient(135deg, #3b0010, #6b0020); border-color: rgba(244,63,94,0.5); }
+    .cat-healthcare:hover  { background: linear-gradient(135deg, #6b0020, #9b0030); border-color: #f43f5e; box-shadow: 0 0 22px rgba(244,63,94,0.25); }
+
+    .cat-education   { background: linear-gradient(135deg, #1a1200, #3d2e00); border-color: rgba(245,158,11,0.5); }
+    .cat-education:hover   { background: linear-gradient(135deg, #3d2e00, #5c4500); border-color: #f59e0b; box-shadow: 0 0 22px rgba(245,158,11,0.2); }
+
+    .cat-housing     { background: linear-gradient(135deg, #001a2e, #003a5e); border-color: rgba(56,189,248,0.5); }
+    .cat-housing:hover     { background: linear-gradient(135deg, #003a5e, #005080); border-color: #38bdf8; box-shadow: 0 0 22px rgba(56,189,248,0.2); }
+
+    .cat-employment  { background: linear-gradient(135deg, #001a0e, #003a1e); border-color: rgba(74,222,128,0.5); }
+    .cat-employment:hover  { background: linear-gradient(135deg, #003a1e, #005030); border-color: #4ade80; box-shadow: 0 0 22px rgba(74,222,128,0.2); }
+
+    .cat-legal       { background: linear-gradient(135deg, #1a0030, #3a0060); border-color: rgba(192,132,252,0.5); }
+    .cat-legal:hover       { background: linear-gradient(135deg, #3a0060, #5a0090); border-color: #c084fc; box-shadow: 0 0 22px rgba(192,132,252,0.2); }
+
+    .cat-food        { background: linear-gradient(135deg, #1e0800, #4a1800); border-color: rgba(251,146,60,0.5); }
+    .cat-food:hover        { background: linear-gradient(135deg, #4a1800, #6a2800); border-color: #fb923c; box-shadow: 0 0 22px rgba(251,146,60,0.2); }
+
+    .cat-transport   { background: linear-gradient(135deg, #000a1e, #001040); border-color: rgba(96,165,250,0.5); }
+    .cat-transport:hover   { background: linear-gradient(135deg, #001040, #001a60); border-color: #60a5fa; box-shadow: 0 0 22px rgba(96,165,250,0.2); }
+
+    .cat-healthcare:hover, .cat-education:hover, .cat-housing:hover,
+    .cat-employment:hover, .cat-legal:hover, .cat-food:hover, .cat-transport:hover {
+      transform: translateX(6px) scale(1.01);
+    }
+
+    /* ── Tech Skills Popup ── */
+    .skills-btn {
+      position: absolute;
+      left: 24px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #b45309, #d97706);
+      border: 1px solid rgba(255,179,0,0.4);
+      border-radius: 12px;
+      padding: 9px 16px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s;
+      white-space: nowrap;
+      font-family: inherit;
+      animation: skillsPulse 2.5s infinite;
+    }
+    .skills-btn:hover {
+      background: linear-gradient(135deg, #d97706, #f59e0b);
+      box-shadow: 0 0 24px rgba(245,158,11,0.6);
+      transform: translateY(-50%) scale(1.04);
+    }
+    @keyframes skillsPulse {
+      0%,100% { box-shadow: 0 0 10px rgba(245,158,11,0.35); }
+      50%      { box-shadow: 0 0 26px rgba(245,158,11,0.75); }
+    }
+
+    .skills-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(3px);
+      z-index: 999;
+      animation: fadeIn 0.2s ease;
+    }
+    .skills-overlay.open { display: block; }
+
+    .skills-popup {
+      display: none;
+      position: fixed;
+      top: 76px;
+      right: 20px;
+      width: 420px;
+      max-width: calc(100vw - 40px);
+      max-height: 80vh;
+      background: rgba(6,6,18,0.97);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(245,158,11,0.3);
+      border-radius: 20px;
+      box-shadow: 0 12px 50px rgba(0,0,0,0.7), 0 0 40px rgba(245,158,11,0.12);
+      z-index: 1000;
+      overflow: hidden;
+      animation: slideDown 0.3s cubic-bezier(0.4,0,0.2,1);
+      flex-direction: column;
+    }
+    .skills-popup.open { display: flex; }
+    @keyframes slideDown { from { opacity:0; transform:translateY(-20px) scale(0.97); } to { opacity:1; transform:translateY(0) scale(1); } }
+
+    .skills-popup-header {
+      background: linear-gradient(135deg, #451a03, #78350f);
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      border-bottom: 1px solid rgba(245,158,11,0.2);
+    }
+    .skills-popup-header h3 { font-size: 15px; font-weight: 800; color: #fef3c7; letter-spacing: 0.5px; }
+    .skills-popup-header p  { font-size: 11px; color: #fcd34d; margin-top: 2px; }
+    .skills-close {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      color: #fef3c7;
+      font-size: 14px;
+      width: 30px; height: 30px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .skills-close:hover { background: rgba(239,68,68,0.3); border-color: #ef4444; }
+
+    .skills-filter-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      flex-shrink: 0;
+      background: rgba(0,0,0,0.2);
+    }
+    .skills-filter {
+      padding: 5px 13px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid rgba(245,158,11,0.25);
+      color: #fcd34d;
+      background: transparent;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .skills-filter.active, .skills-filter:hover {
+      background: #f59e0b;
+      color: #000;
+      border-color: #f59e0b;
+      box-shadow: 0 0 10px rgba(245,158,11,0.4);
+    }
+
+    .skills-list {
+      overflow-y: auto;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .skill-item {
+      background: rgba(20,15,5,0.9);
+      border: 1px solid rgba(245,158,11,0.12);
+      border-radius: 14px;
+      padding: 13px 14px;
+      transition: all 0.2s;
+    }
+    .skill-item:hover { border-color: rgba(245,158,11,0.5); box-shadow: 0 0 16px rgba(245,158,11,0.1); transform: translateX(3px); }
+    .skill-item-top { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+    .skill-emoji { font-size: 20px; }
+    .skill-name  { font-size: 13px; font-weight: 700; color: #fef3c7; flex: 1; }
+    .skill-tag   { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+    .stag-ai     { background: rgba(30,27,75,0.9);  color: #a5b4fc; border: 1px solid rgba(99,102,241,0.5); }
+    .stag-web    { background: rgba(12,74,110,0.9);  color: #7dd3fc; border: 1px solid rgba(56,189,248,0.5); }
+    .stag-data   { background: rgba(6,78,59,0.9);   color: #6ee7b7; border: 1px solid rgba(16,185,129,0.5); }
+    .stag-cloud  { background: rgba(30,58,138,0.9);  color: #93c5fd; border: 1px solid rgba(59,130,246,0.5); }
+    .stag-cyber  { background: rgba(69,10,10,0.9);   color: #fca5a5; border: 1px solid rgba(239,68,68,0.5); }
+    .stag-mobile { background: rgba(59,7,100,0.9);   color: #d8b4fe; border: 1px solid rgba(168,85,247,0.5); }
+    .skill-desc  { font-size: 11px; color: #78716c; line-height: 1.5; margin-bottom: 8px; }
+    .skill-links { display: flex; gap: 8px; flex-wrap: wrap; }
+    .skill-links a {
+      font-size: 11px; color: #f59e0b;
+      text-decoration: none;
+      border: 1px solid rgba(245,158,11,0.3);
+      border-radius: 8px;
+      padding: 3px 10px;
+      transition: all 0.2s;
+    }
+    .skill-links a:hover { background: #f59e0b; color: #000; border-color: #f59e0b; box-shadow: 0 0 10px rgba(245,158,11,0.4); }
+
+    .cat-techskills { background: linear-gradient(135deg, #451a03, #78350f); border-color: rgba(245,158,11,0.5); }
+    .cat-techskills:hover { background: linear-gradient(135deg, #78350f, #92400e); border-color: #f59e0b; transform: translateX(6px) scale(1.01); box-shadow: 0 0 20px rgba(245,158,11,0.2); }
+
+    /* ── Subject category highlight ── */
+    .category-card.subjects-card {
+      background: linear-gradient(135deg, #13104a, #1e1b6b);
+      border-color: rgba(99,102,241,0.5);
+    }
+    .category-card.subjects-card:hover {
+      background: linear-gradient(135deg, #1e1b6b, #312e81);
+      border-color: #818cf8;
+      box-shadow: 0 0 20px rgba(99,102,241,0.25);
+    }
+
+    /* ── Subject search panel ── */
+    .subject-panel {
+      display: none;
+      background: rgba(6,5,25,0.94);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(99,102,241,0.25);
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 4px;
+      animation: fadeIn 0.3s ease;
+      box-shadow: 0 0 40px rgba(99,102,241,0.07);
+    }
+    .subject-panel.open { display: block; }
+    .subject-panel h3 { font-size: 14px; color: #a5b4fc; margin-bottom: 12px; font-weight: 700; }
+    .subject-input-row { display: flex; gap: 8px; margin-bottom: 12px; }
+    .subject-input-row input {
+      flex: 1;
+      background: rgba(8,8,30,0.9);
+      border: 1px solid rgba(99,102,241,0.25);
+      border-radius: 12px;
+      padding: 9px 14px;
+      color: #e2e8f0;
+      font-size: 14px;
+      outline: none;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+    .subject-input-row input:focus { border-color: #6366f1; box-shadow: 0 0 14px rgba(99,102,241,0.2); }
+    .subject-search-btn {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      border: none;
+      border-radius: 12px;
+      padding: 9px 18px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .subject-search-btn:hover { box-shadow: 0 0 18px rgba(99,102,241,0.5); transform: scale(1.03); }
+    .subject-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .subject-tag {
+      background: rgba(8,8,30,0.8);
+      border: 1px solid rgba(99,102,241,0.2);
+      border-radius: 16px;
+      padding: 5px 13px;
+      font-size: 12px;
+      cursor: pointer;
+      color: #a5b4fc;
+      transition: all 0.2s;
+    }
+    .subject-tag:hover { background: rgba(99,102,241,0.25); color: #c7d2fe; border-color: #6366f1; box-shadow: 0 0 10px rgba(99,102,241,0.2); }
+
+    .subject-result {
+      background: rgba(6,5,25,0.9);
+      border: 1px solid rgba(99,102,241,0.15);
+      border-radius: 12px;
+      padding: 10px 14px;
+      margin-top: 8px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      transition: border-color 0.2s;
+    }
+    .subject-result:hover { border-color: rgba(99,102,241,0.4); }
+    .subject-result .sr-icon  { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
+    .subject-result .sr-title { font-size: 13px; font-weight: 600; color: #e2e8f0; }
+    .subject-result .sr-desc  { font-size: 11px; color: #475569; margin-top: 2px; }
+    .subject-result .sr-links { display: flex; gap: 10px; margin-top: 6px; flex-wrap: wrap; }
+    .subject-result .sr-links a { font-size: 12px; color: var(--neon-blue); text-decoration: underline; }
+
+    /* ── Main section label ── */
+    .main { flex: 1; display: flex; flex-direction: column; gap: 14px; }
+
+    @media (max-width: 768px) {
+      .container { flex-direction: column; padding: 12px; }
+      .sidebar { width: 100%; flex-direction: row; flex-wrap: wrap; }
+      .category-card { flex: 1; min-width: 130px; }
+      header h1 { font-size: 22px; }
+      .skills-btn { font-size: 11px; padding: 7px 10px; left: 10px; }
+      header .wiki-link { right: 10px; font-size: 11px; padding: 7px 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">📚</div>
+  <h1>Digital Library</h1>
+  <p>AI-powered access to public services, resources &amp; opportunities</p>
+  <button class="skills-btn" onclick="toggleSkillsPopup()">⚡ Tech Skills</button>
+  <a class="wiki-link" href="https://www.wikipedia.org" target="_blank" rel="noopener">
+    <img src="https://www.wikipedia.org/static/favicon/wikipedia.ico" width="18" height="18" alt="Wikipedia" style="border-radius:3px;" />
+    Wikipedia
+  </a>
+</header>
+
+<div class="container">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div>
+      <h2>Browse by Category</h2>
+    </div>
+
+    <div class="category-card cat-healthcare" onclick="askCategory('healthcare')">
+      <span class="icon">🏥</span>
+      <div>
+        <div class="label">Healthcare</div>
+        <div class="sub">Clinics, insurance, Medicaid</div>
+      </div>
+    </div>
+
+    <div class="category-card cat-education" onclick="askCategory('education')">
+      <span class="icon">🎓</span>
+      <div>
+        <div class="label">Education</div>
+        <div class="sub">Scholarships, schools, training</div>
+      </div>
+    </div>
+
+    <div class="category-card cat-housing" onclick="askCategory('housing')">
+      <span class="icon">🏠</span>
+      <div>
+        <div class="label">Housing</div>
+        <div class="sub">Affordable housing, assistance</div>
+      </div>
+    </div>
+
+    <div class="category-card cat-employment" onclick="askCategory('employment')">
+      <span class="icon">💼</span>
+      <div>
+        <div class="label">Employment</div>
+        <div class="sub">Jobs, unemployment, training</div>
+      </div>
+    </div>
+
+    <div class="category-card cat-legal" onclick="askCategory('legal aid')">
+      <span class="icon">⚖️</span>
+      <div>
+        <div class="label">Legal Aid</div>
+        <div class="sub">Free legal help, rights</div>
+      </div>
+    </div>
+
+    <div class="category-card cat-food" onclick="askCategory('food assistance')">
+      <span class="icon">🍎</span>
+      <div>
+        <div class="label">Food Assistance</div>
+        <div class="sub">SNAP, food banks, WIC</div>
+      </div>
+    </div>
+
+    <div class="category-card cat-transport" onclick="askCategory('transportation')">
+      <span class="icon">🚌</span>
+      <div>
+        <div class="label">Transportation</div>
+        <div class="sub">Public transit, ride programs</div>
+      </div>
+    </div>
+
+    <div class="category-card subjects-card" onclick="toggleSubjectPanel()">
+      <span class="icon">🔭</span>
+      <div>
+        <div class="label">Explore Subjects</div>
+        <div class="sub">Science, history, tech & more</div>
+      </div>
+    </div>
+
+    <div class="category-card opps-card" onclick="toggleOppsPanel()">
+      <span class="icon">🚀</span>
+      <div>
+        <div class="label">Opportunities</div>
+        <div class="sub">Jobs, tech, scholarships for youth</div>
+      </div>
+    </div>
+
+    <div class="category-card cat-techskills" onclick="toggleSkillsPopup()">
+      <span class="icon">⚡</span>
+      <div>
+        <div class="label">Tech Skills</div>
+        <div class="sub">Trending skills in the market</div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats" style="margin-top:8px;">
+      <div class="stat-box"><div class="num">50+</div><div class="lbl">Services Covered</div></div>
+      <div class="stat-box"><div class="num">24/7</div><div class="lbl">Available</div></div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- Subject Search Panel -->
+    <div class="subject-panel" id="subjectPanel">
+      <h3>🔭 Explore Any Subject — powered by the web</h3>
+      <div class="subject-input-row">
+        <input type="text" id="subjectInput" placeholder="e.g. Quantum Physics, World War II, Machine Learning..." onkeydown="if(event.key==='Enter') searchSubject()" />
+        <button class="subject-search-btn" onclick="searchSubject()">Search ↗</button>
+      </div>
+      <div class="subject-tags">
+        <span class="subject-tag" onclick="quickSubject('Artificial Intelligence')">🤖 AI</span>
+        <span class="subject-tag" onclick="quickSubject('Climate Change')">🌍 Climate Change</span>
+        <span class="subject-tag" onclick="quickSubject('Human Anatomy')">🫀 Human Anatomy</span>
+        <span class="subject-tag" onclick="quickSubject('World War II')">⚔️ WW2</span>
+        <span class="subject-tag" onclick="quickSubject('Quantum Physics')">⚛️ Quantum Physics</span>
+        <span class="subject-tag" onclick="quickSubject('Space Exploration')">🚀 Space</span>
+        <span class="subject-tag" onclick="quickSubject('Democracy')">🗳️ Democracy</span>
+        <span class="subject-tag" onclick="quickSubject('Blockchain')">🔗 Blockchain</span>
+        <span class="subject-tag" onclick="quickSubject('Psychology')">🧠 Psychology</span>
+        <span class="subject-tag" onclick="quickSubject('Renewable Energy')">⚡ Renewable Energy</span>
+      </div>
+    </div>
+
+    <!-- Opportunities Panel -->
+    <div class="opps-panel" id="oppsPanel">
+      <div class="opps-header">
+        <h3>🚀 Opportunities for Youth &amp; Students</h3>
+        <span>✨ Updated regularly</span>
+      </div>
+      <div class="opps-tabs">
+        <button class="opps-tab active" onclick="filterOpps('all', this)">All</button>
+        <button class="opps-tab" onclick="filterOpps('tech', this)">💻 Tech</button>
+        <button class="opps-tab" onclick="filterOpps('scholarship', this)">🎓 Scholarships</button>
+        <button class="opps-tab" onclick="filterOpps('internship', this)">💼 Internships</button>
+        <button class="opps-tab" onclick="filterOpps('competition', this)">🏆 Competitions</button>
+        <button class="opps-tab" onclick="filterOpps('program', this)">🌍 Programs</button>
+      </div>
+      <div class="opps-grid" id="oppsGrid"></div>
+    </div>
+
+    <!-- Quick chips -->
+    <div class="chips">
+      <span class="chip" onclick="sendChip('How do I apply for Medicaid?')">🏥 Apply for Medicaid</span>
+      <span class="chip" onclick="sendChip('Find scholarships for college')">🎓 College Scholarships</span>
+      <span class="chip" onclick="sendChip('I need emergency housing help')">🏠 Emergency Housing</span>
+      <span class="chip" onclick="sendChip('How to file for unemployment benefits?')">💼 Unemployment Benefits</span>
+      <span class="chip" onclick="sendChip('Where can I get free food near me?')">🍎 Food Banks</span>
+      <span class="chip" onclick="sendChip('I need free legal advice')">⚖️ Free Legal Help</span>
+      <span class="chip" onclick="toggleSubjectPanel()">🔭 Explore Subjects</span>
+      <span class="chip" onclick="toggleOppsPanel()">🚀 Opportunities</span>
+    </div>
+
+    <!-- Chat window -->
+    <div class="chat-window" id="chatWindow">
+      <!-- Welcome message -->
+      <div class="message bot">
+        <div class="avatar">🤖</div>
+        <div class="bubble">
+          <strong>Welcome to Digital Library!</strong> I'm here to help you navigate public services, find resources, and access opportunities in your community.<br><br>
+          You can ask me about:
+          <ul>
+            <li>Government benefits &amp; assistance programs</li>
+            <li>Healthcare, housing, and food resources</li>
+            <li>Education grants and scholarships</li>
+            <li>Employment and job training programs</li>
+            <li>Legal aid and civil rights</li>
+            <li>Any subject — science, history, tech, and more</li>
+            <li>Latest opportunities, internships &amp; tech news for students</li>
+          </ul>
+          <br>How can I help you today?
+        </div>
+      </div>
+    </div>
+
+    <!-- Input bar -->
+    <div class="input-bar">
+      <input type="text" id="userInput" placeholder="Ask about any public service or resource..." onkeydown="if(event.key==='Enter') sendMessage()" />
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()">Send ➤</button>
+    </div>
+
+  </main>
+</div>
+
+<!-- Tech Skills Overlay -->
+<div class="skills-overlay" id="skillsOverlay" onclick="toggleSkillsPopup()"></div>
+
+<!-- Tech Skills Popup -->
+<div class="skills-popup" id="skillsPopup">
+  <div class="skills-popup-header">
+    <div>
+      <h3>⚡ Trending Tech Skills 2025</h3>
+      <p>Hot skills entering the job market right now</p>
+    </div>
+    <button class="skills-close" onclick="toggleSkillsPopup()">✕</button>
+  </div>
+  <div class="skills-filter-row">
+    <button class="skills-filter active" onclick="filterSkills('all',this)">All</button>
+    <button class="skills-filter" onclick="filterSkills('ai',this)">🤖 AI</button>
+    <button class="skills-filter" onclick="filterSkills('web',this)">🌐 Web</button>
+    <button class="skills-filter" onclick="filterSkills('data',this)">📊 Data</button>
+    <button class="skills-filter" onclick="filterSkills('cloud',this)">☁️ Cloud</button>
+    <button class="skills-filter" onclick="filterSkills('cyber',this)">🔐 Cyber</button>
+    <button class="skills-filter" onclick="filterSkills('mobile',this)">📱 Mobile</button>
+  </div>
+  <div class="skills-list" id="skillsList"></div>
+</div>
+
+<script>
+  // ── Knowledge base: keyword → structured response ──
+  const KB = {
+    healthcare: {
+      title: "Healthcare Resources",
+      intro: "Here are key healthcare resources available to the public:",
+      resources: [
+        { icon:"🏥", title:"Medicaid", desc:"Free/low-cost health coverage for eligible low-income adults, children, pregnant women.", link:"https://www.medicaid.gov", linkText:"Apply at Medicaid.gov" },
+        { icon:"🩺", title:"CHIP", desc:"Children's Health Insurance Program for uninsured children in families that earn too much for Medicaid.", link:"https://www.insurekidsnow.gov", linkText:"Learn more" },
+        { icon:"💊", title:"Community Health Centers", desc:"Federally funded clinics offering care regardless of ability to pay.", link:"https://findahealthcenter.hrsa.gov", linkText:"Find a clinic near you" },
+        { icon:"📋", title:"Healthcare.gov", desc:"Marketplace insurance plans, subsidies, and open enrollment information.", link:"https://www.healthcare.gov", linkText:"Browse plans" },
+      ]
+    },
+    education: {
+      title: "Education & Scholarships",
+      intro: "Explore education funding and learning opportunities:",
+      resources: [
+        { icon:"🎓", title:"Federal Student Aid (FAFSA)", desc:"Apply for federal grants, loans, and work-study programs for college.", link:"https://studentaid.gov", linkText:"Apply at StudentAid.gov" },
+        { icon:"📚", title:"Pell Grant", desc:"Need-based grant up to $7,395/year for undergraduate students — no repayment required.", link:"https://studentaid.gov/understand-aid/types/grants/pell", linkText:"Check eligibility" },
+        { icon:"🏫", title:"Adult Education & GED", desc:"Free or low-cost programs to earn your high school equivalency diploma.", link:"https://lincs.ed.gov/state-resources/federal-initiatives/adult-education", linkText:"Find programs" },
+        { icon:"💻", title:"Digital Literacy Programs", desc:"Free tech training through public libraries and community colleges.", link:"https://www.digitallearn.org", linkText:"Start learning" },
+      ]
+    },
+    housing: {
+      title: "Housing Assistance",
+      intro: "Resources for affordable housing and emergency shelter:",
+      resources: [
+        { icon:"🏠", title:"HUD Housing Assistance", desc:"Federal programs for rental assistance, public housing, and homeownership.", link:"https://www.hud.gov/topics/rental_assistance", linkText:"HUD.gov" },
+        { icon:"🆘", title:"Emergency Shelter", desc:"Find emergency shelters and transitional housing in your area.", link:"https://www.211.org", linkText:"Call 211 or visit 211.org" },
+        { icon:"📑", title:"Section 8 / Housing Choice Voucher", desc:"Rental assistance for low-income families, elderly, and disabled individuals.", link:"https://www.hud.gov/program_offices/public_indian_housing/programs/hcv", linkText:"Learn more" },
+        { icon:"🔑", title:"Eviction Prevention", desc:"Legal aid and financial assistance to prevent eviction.", link:"https://www.consumerfinance.gov/coronavirus/mortgage-and-housing-assistance/renter-protections", linkText:"Get help" },
+      ]
+    },
+    employment: {
+      title: "Employment & Job Resources",
+      intro: "Find jobs, training, and unemployment support:",
+      resources: [
+        { icon:"💼", title:"CareerOneStop", desc:"Job search, resume help, and career exploration tools funded by the U.S. Dept. of Labor.", link:"https://www.careeronestop.org", linkText:"Search jobs" },
+        { icon:"📉", title:"Unemployment Insurance", desc:"File for unemployment benefits through your state's workforce agency.", link:"https://www.dol.gov/general/topic/unemployment-insurance", linkText:"File a claim" },
+        { icon:"🛠️", title:"Job Corps", desc:"Free education and vocational training for young adults ages 16–24.", link:"https://www.jobcorps.gov", linkText:"Apply to Job Corps" },
+        { icon:"👩‍💻", title:"Workforce Development Boards", desc:"Local training programs, apprenticeships, and employer connections.", link:"https://www.careeronestop.org/LocalHelp/AmericanJobCenters/find-american-job-centers.aspx", linkText:"Find a center" },
+      ]
+    },
+    "legal aid": {
+      title: "Legal Aid & Civil Rights",
+      intro: "Access free or low-cost legal help:",
+      resources: [
+        { icon:"⚖️", title:"Legal Services Corporation", desc:"Federally funded civil legal aid for low-income Americans.", link:"https://www.lsc.gov/about-lsc/what-legal-aid/get-legal-help", linkText:"Find legal aid" },
+        { icon:"📜", title:"Law Help", desc:"Free legal information and referrals by state.", link:"https://www.lawhelp.org", linkText:"LawHelp.org" },
+        { icon:"🛡️", title:"ACLU", desc:"Protect your civil liberties and know your rights.", link:"https://www.aclu.org/know-your-rights", linkText:"Know your rights" },
+        { icon:"🏛️", title:"Court Self-Help Centers", desc:"Many courthouses offer free assistance for people representing themselves.", link:"https://www.uscourts.gov/legal-resources/find-legal-help", linkText:"Find help" },
+      ]
+    },
+    "food assistance": {
+      title: "Food Assistance Programs",
+      intro: "No one should go hungry — here are food resources:",
+      resources: [
+        { icon:"🍎", title:"SNAP (Food Stamps)", desc:"Monthly benefits to buy groceries for eligible low-income households.", link:"https://www.fns.usda.gov/snap/recipient/eligibility", linkText:"Check eligibility" },
+        { icon:"🤱", title:"WIC Program", desc:"Nutrition support for pregnant women, new mothers, and children under 5.", link:"https://www.fns.usda.gov/wic", linkText:"Apply for WIC" },
+        { icon:"🏪", title:"Food Banks", desc:"Find local food pantries and food banks near you.", link:"https://www.feedingamerica.org/find-your-local-foodbank", linkText:"Find a food bank" },
+        { icon:"🍽️", title:"School Meals", desc:"Free and reduced-price meals for eligible students.", link:"https://www.fns.usda.gov/nslp", linkText:"Learn more" },
+      ]
+    },
+    transportation: {
+      title: "Transportation Resources",
+      intro: "Public and assisted transportation options:",
+      resources: [
+        { icon:"🚌", title:"Public Transit Finder", desc:"Find local bus, subway, and rail options in your city.", link:"https://www.transit.dot.gov", linkText:"Transit.dot.gov" },
+        { icon:"🚗", title:"Medicaid Transportation", desc:"Free rides to medical appointments for Medicaid recipients.", link:"https://www.medicaid.gov/medicaid/benefits/nonemergency-medical-transportation/index.html", linkText:"Learn more" },
+        { icon:"🧓", title:"Senior Transportation", desc:"Ride programs for elderly and disabled individuals.", link:"https://eldercare.acl.gov", linkText:"Eldercare Locator" },
+        { icon:"🚲", title:"Bike Share Programs", desc:"Affordable bike-share programs in many cities.", link:"https://nacto.org/bike-share-statistics", linkText:"Find programs" },
+      ]
+    }
+  };
+
+  // ── Keyword matcher ──
+  function detectCategory(text) {
+    const t = text.toLowerCase();
+    if (/health|medic|doctor|clinic|insurance|hospital|prescription|chip/.test(t)) return 'healthcare';
+    if (/school|college|university|scholarship|grant|fafsa|education|ged|learn|study|degree/.test(t)) return 'education';
+    if (/hous|rent|shelter|evict|homeless|apartment|section 8|hud/.test(t)) return 'housing';
+    if (/job|work|employ|unemploy|career|hire|resume|training|workforce/.test(t)) return 'employment';
+    if (/legal|lawyer|attorney|court|rights|civil|law|eviction notice/.test(t)) return 'legal aid';
+    if (/food|eat|hungry|snap|wic|grocery|meal|nutrition|food bank/.test(t)) return 'food assistance';
+    if (/bus|transit|transport|ride|commute|subway|train|bike/.test(t)) return 'transportation';
+    if (/opportunit|internship|hackathon|scholarship|fellowship|competition|tech news|latest tech|youth program|student program/.test(t)) return 'opportunities';
+    return null;
+  }
+
+  // ── Build HTML response from KB entry ──
+  function buildResponse(cat) {
+    const data = KB[cat];
+    let html = `<strong>${data.title}</strong><br>${data.intro}`;
+    data.resources.forEach(r => {
+      html += `
+        <div class="resource-card">
+          <span class="rc-icon">${r.icon}</span>
+          <div>
+            <div class="rc-title">${r.title}</div>
+            <div class="rc-desc">${r.desc}</div>
+            <a href="${r.link}" target="_blank" rel="noopener">${r.linkText} ↗</a>
+          </div>
+        </div>`;
+    });
+    html += `<br><small style="color:#64748b">💡 Tip: Call <strong>211</strong> anytime to connect with local social services.</small>`;
+    return html;
+  }
+
+  // ── Fallback AI-style responses ──
+  function fallbackResponse(text) {
+    const t = text.toLowerCase();
+    if (/hello|hi|hey/.test(t)) return "Hey there! 👋 I'm Digital Library. Ask me about healthcare, housing, food, education, jobs, legal aid, or transportation resources.";
+    if (/thank/.test(t)) return "You're welcome! Remember, you can always call <strong>211</strong> to reach local social services. Is there anything else I can help you with?";
+    if (/211/.test(t)) return "📞 <strong>211</strong> is a free, confidential service that connects people to local health and human services. Available 24/7 in most areas. Just dial 2-1-1 from any phone.";
+    if (/emergency|urgent|crisis/.test(t)) return "🆘 For immediate emergencies, call <strong>911</strong>. For social service crises (housing, food, mental health), call <strong>211</strong>. For mental health crisis, call <strong>988</strong> (Suicide & Crisis Lifeline).";
+    if (/disability|disabled/.test(t)) return "For disability-related resources, I can help with: <ul><li>SSI/SSDI benefits → <a href='https://www.ssa.gov/disability' target='_blank'>SSA.gov</a></li><li>ADA rights → <a href='https://www.ada.gov' target='_blank'>ADA.gov</a></li><li>Vocational Rehabilitation → <a href='https://rsa.ed.gov' target='_blank'>RSA.ed.gov</a></li></ul>";
+    if (/veteran|military/.test(t)) return "🎖️ Veterans can access resources at <a href='https://www.va.gov' target='_blank'>VA.gov</a> for healthcare, housing, education (GI Bill), and employment support.";
+    if (/immigrant|immigration|visa|citizenship/.test(t)) return "For immigration resources: <ul><li>USCIS → <a href='https://www.uscis.gov' target='_blank'>uscis.gov</a></li><li>Immigration legal aid → <a href='https://www.immigrationadvocates.org' target='_blank'>ImmigrationAdvocates.org</a></li><li>Know your rights → <a href='https://www.aclu.org/know-your-rights/immigrants-rights' target='_blank'>ACLU Immigrant Rights</a></li></ul>";
+    return `I can help you find public resources on topics like <strong>healthcare, housing, food, education, jobs, legal aid,</strong> and <strong>transportation</strong>. Could you tell me more about what you're looking for? Or try clicking one of the category cards on the left.`;
+  }
+
+  // ── Append message to chat ──
+  function appendMessage(role, html) {
+    const win = document.getElementById('chatWindow');
+    const div = document.createElement('div');
+    div.className = `message ${role}`;
+    div.innerHTML = `
+      <div class="avatar">${role === 'bot' ? '🤖' : '👤'}</div>
+      <div class="bubble">${html}</div>`;
+    win.appendChild(div);
+    win.scrollTop = win.scrollHeight;
+  }
+
+  function showTyping() {
+    const win = document.getElementById('chatWindow');
+    const div = document.createElement('div');
+    div.className = 'message bot typing';
+    div.id = 'typingIndicator';
+    div.innerHTML = `<div class="avatar">🤖</div><div class="bubble"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+    win.appendChild(div);
+    win.scrollTop = win.scrollHeight;
+  }
+
+  function removeTyping() {
+    const el = document.getElementById('typingIndicator');
+    if (el) el.remove();
+  }
+
+  // ── Main send logic ──
+  function sendMessage() {
+    const input = document.getElementById('userInput');
+    const btn   = document.getElementById('sendBtn');
+    const text  = input.value.trim();
+    if (!text) return;
+
+    appendMessage('user', text);
+    input.value = '';
+    btn.disabled = true;
+    showTyping();
+
+    setTimeout(() => {
+      removeTyping();
+      const cat = detectCategory(text);
+      // Check for subject query patterns
+      const subjectMatch = text.match(/^(?:tell me about|what is|what are|explain|describe|info on|information about|search|look up|find|about)\s+(.+)/i);
+      let reply;
+      if (cat === 'opportunities') {
+        reply = null;
+        toggleOppsPanel();
+      } else if (cat) {
+        reply = buildResponse(cat);
+      } else if (subjectMatch) {
+        reply = buildSubjectResponse(subjectMatch[1].trim());
+      } else {
+        reply = fallbackResponse(text);
+      }
+      if (reply !== null) appendMessage('bot', reply);
+      btn.disabled = false;
+      input.focus();
+    }, 900);
+  }
+
+  function sendChip(text) {
+    document.getElementById('userInput').value = text;
+    sendMessage();
+  }
+
+  function askCategory(cat) {
+    sendChip(`Tell me about ${cat} resources`);
+  }
+
+  // ── Subject Explorer ──
+  function toggleSubjectPanel() {
+    const panel = document.getElementById('subjectPanel');
+    panel.classList.toggle('open');
+    if (panel.classList.contains('open')) {
+      document.getElementById('subjectInput').focus();
+    }
+  }
+
+  function quickSubject(topic) {
+    document.getElementById('subjectInput').value = topic;
+    searchSubject();
+  }
+
+  function searchSubject() {
+    const input = document.getElementById('subjectInput');
+    const topic = input.value.trim();
+    if (!topic) return;
+
+    // Close panel and send to chat
+    document.getElementById('subjectPanel').classList.remove('open');
+    appendMessage('user', `Tell me about: ${topic}`);
+    showTyping();
+
+    setTimeout(() => {
+      removeTyping();
+      appendMessage('bot', buildSubjectResponse(topic));
+    }, 1000);
+
+    input.value = '';
+  }
+
+  function buildSubjectResponse(topic) {
+    const encoded = encodeURIComponent(topic);
+    const wikiSlug = topic.trim().replace(/\s+/g, '_');
+
+    const sources = [
+      {
+        icon: '📖',
+        title: 'Wikipedia',
+        desc: `Read the full Wikipedia article on "${topic}" — a comprehensive, community-maintained encyclopedia entry.`,
+        links: [
+          { url: `https://en.wikipedia.org/wiki/${wikiSlug}`, text: 'Open Wikipedia article ↗' }
+        ]
+      },
+      {
+        icon: '🔍',
+        title: 'Google Search',
+        desc: `Search across the entire web for the latest information, news, and resources about "${topic}".`,
+        links: [
+          { url: `https://www.google.com/search?q=${encoded}`, text: 'Search on Google ↗' },
+          { url: `https://www.google.com/search?q=${encoded}+news`, text: 'Latest news ↗' }
+        ]
+      },
+      {
+        icon: '🎓',
+        title: 'Khan Academy',
+        desc: `Free educational videos and lessons on "${topic}" — great for students and self-learners.`,
+        links: [
+          { url: `https://www.khanacademy.org/search?page_search_query=${encoded}`, text: 'Learn on Khan Academy ↗' }
+        ]
+      },
+      {
+        icon: '📰',
+        title: 'Google Scholar',
+        desc: `Find peer-reviewed academic papers, research, and scholarly articles about "${topic}".`,
+        links: [
+          { url: `https://scholar.google.com/scholar?q=${encoded}`, text: 'Browse research papers ↗' }
+        ]
+      },
+      {
+        icon: '🎬',
+        title: 'YouTube',
+        desc: `Watch educational videos, documentaries, and explainers about "${topic}".`,
+        links: [
+          { url: `https://www.youtube.com/results?search_query=${encoded}`, text: 'Watch on YouTube ↗' }
+        ]
+      },
+      {
+        icon: '📚',
+        title: 'Internet Archive',
+        desc: `Access free books, historical documents, and archived media related to "${topic}".`,
+        links: [
+          { url: `https://archive.org/search?query=${encoded}`, text: 'Browse Archive.org ↗' }
+        ]
+      }
+    ];
+
+    let html = `<strong>🔭 Subject: ${topic}</strong><br>Here's everything I found across the web:`;
+
+    sources.forEach(s => {
+      const linksHtml = s.links.map(l => `<a href="${l.url}" target="_blank" rel="noopener">${l.text}</a>`).join(' &nbsp;');
+      html += `
+        <div class="subject-result">
+          <span class="sr-icon">${s.icon}</span>
+          <div>
+            <div class="sr-title">${s.title}</div>
+            <div class="sr-desc">${s.desc}</div>
+            <div class="sr-links">${linksHtml}</div>
+          </div>
+        </div>`;
+    });
+
+    html += `<br><small style="color:#6366f1">🔭 Tip: Click any link above to explore "${topic}" in depth across different sources.</small>`;
+    return html;
+  }
+
+  // ── Opportunities Data ──
+  const OPPS = [
+    {
+      tag: 'tech', icon: '🤖', badge: 'badge-hot', badgeText: '🔥 Trending',
+      title: 'Google Summer of Code 2025',
+      desc: 'Paid open-source internship for students. Work with top orgs like Mozilla, Apache, and more. Stipend up to $6,600.',
+      links: [
+        { url: 'https://summerofcode.withgoogle.com', text: 'Apply Now' },
+        { url: 'https://www.google.com/search?q=Google+Summer+of+Code+2025', text: 'Latest News' }
+      ]
+    },
+    {
+      tag: 'scholarship', icon: '🎓', badge: 'badge-new', badgeText: '✨ New',
+      title: 'Gates Scholarship 2025',
+      desc: 'Full scholarship for exceptional minority students with significant financial need. Covers full cost of attendance.',
+      links: [
+        { url: 'https://www.thegatesscholarship.org', text: 'Learn More' },
+        { url: 'https://www.google.com/search?q=Gates+Scholarship+2025+deadline', text: 'Deadlines' }
+      ]
+    },
+    {
+      tag: 'internship', icon: '💼', badge: 'badge-open', badgeText: '🟣 Open',
+      title: 'NASA Internship Program',
+      desc: 'Paid STEM internships at NASA centers across the US. Open to high school, undergrad, and grad students.',
+      links: [
+        { url: 'https://intern.nasa.gov', text: 'Apply at NASA' },
+        { url: 'https://www.youtube.com/results?search_query=NASA+internship+experience', text: 'Watch Stories' }
+      ]
+    },
+    {
+      tag: 'tech', icon: '💻', badge: 'badge-free', badgeText: '🆓 Free',
+      title: 'GitHub Student Developer Pack',
+      desc: 'Free access to 100+ developer tools — GitHub Pro, AWS credits, Canva Pro, JetBrains IDEs and more.',
+      links: [
+        { url: 'https://education.github.com/pack', text: 'Get Free Pack' },
+        { url: 'https://www.google.com/search?q=GitHub+student+developer+pack+2025', text: 'What\'s New' }
+      ]
+    },
+    {
+      tag: 'competition', icon: '🏆', badge: 'badge-hot', badgeText: '🔥 Hot',
+      title: 'MIT Hacking Medicine Hackathon',
+      desc: 'Global health hackathon for students to solve real medical challenges. Win prizes and mentorship from MIT.',
+      links: [
+        { url: 'https://hackingmedicine.mit.edu', text: 'Join Hackathon' },
+        { url: 'https://www.google.com/search?q=MIT+hacking+medicine+2025', text: 'More Info' }
+      ]
+    },
+    {
+      tag: 'program', icon: '🌍', badge: 'badge-new', badgeText: '✨ New',
+      title: 'UN Youth Volunteer Programme',
+      desc: 'International volunteering for youth aged 18–29. Gain global experience in development, peace, and sustainability.',
+      links: [
+        { url: 'https://www.unv.org/become-volunteer/youth-volunteering', text: 'Apply Now' },
+        { url: 'https://www.google.com/search?q=UN+youth+volunteer+2025', text: 'Learn More' }
+      ]
+    },
+    {
+      tag: 'tech', icon: '🧠', badge: 'badge-free', badgeText: '🆓 Free',
+      title: 'Microsoft AI Skills Challenge',
+      desc: 'Free AI & cloud learning paths on Microsoft Learn. Earn certifications and badges recognized by employers.',
+      links: [
+        { url: 'https://learn.microsoft.com/en-us/training/student-hub', text: 'Start Learning' },
+        { url: 'https://www.google.com/search?q=Microsoft+AI+skills+challenge+students+2025', text: 'Latest Challenges' }
+      ]
+    },
+    {
+      tag: 'scholarship', icon: '🏅', badge: 'badge-open', badgeText: '🟣 Open',
+      title: 'Chevening Scholarships 2025–26',
+      desc: 'UK government scholarship for future global leaders. Fully funded master\'s degree at any UK university.',
+      links: [
+        { url: 'https://www.chevening.org/scholarships', text: 'Apply Now' },
+        { url: 'https://www.google.com/search?q=Chevening+scholarship+2025+eligibility', text: 'Check Eligibility' }
+      ]
+    },
+    {
+      tag: 'internship', icon: '🔬', badge: 'badge-new', badgeText: '✨ New',
+      title: 'CERN Summer Student Programme',
+      desc: 'Work at the world\'s largest physics lab in Geneva. Open to bachelor\'s and master\'s students in physics, CS, and engineering.',
+      links: [
+        { url: 'https://careers.cern/summer', text: 'Apply at CERN' },
+        { url: 'https://www.youtube.com/results?search_query=CERN+summer+student+experience', text: 'Watch Experiences' }
+      ]
+    },
+    {
+      tag: 'competition', icon: '🚀', badge: 'badge-hot', badgeText: '🔥 Hot',
+      title: 'SpaceX Hyperloop Pod Competition',
+      desc: 'Engineering competition for student teams to design and build the fastest Hyperloop pod. Global participation.',
+      links: [
+        { url: 'https://www.google.com/search?q=student+hyperloop+competition+2025', text: 'Find Competitions' },
+        { url: 'https://www.youtube.com/results?search_query=hyperloop+student+competition', text: 'Watch on YouTube' }
+      ]
+    },
+    {
+      tag: 'program', icon: '🌱', badge: 'badge-free', badgeText: '🆓 Free',
+      title: 'Google Career Certificates',
+      desc: 'Free professional certificates in IT, Data Analytics, UX Design, Cybersecurity, and more. No degree required.',
+      links: [
+        { url: 'https://grow.google/certificates', text: 'Start Free' },
+        { url: 'https://www.google.com/search?q=Google+career+certificate+2025+jobs', text: 'Job Outcomes' }
+      ]
+    },
+    {
+      tag: 'tech', icon: '⚡', badge: 'badge-new', badgeText: '✨ New',
+      title: 'Meta Open Source Internship',
+      desc: 'Contribute to Meta\'s open-source projects (React, PyTorch, LLVM). Remote-friendly, paid, for CS students.',
+      links: [
+        { url: 'https://www.metacareers.com/students-and-grads', text: 'Apply at Meta' },
+        { url: 'https://www.google.com/search?q=Meta+internship+2025+students', text: 'Latest Openings' }
+      ]
+    }
+  ];
+
+  let currentOppsFilter = 'all';
+
+  function renderOpps(filter) {
+    const grid = document.getElementById('oppsGrid');
+    const filtered = filter === 'all' ? OPPS : OPPS.filter(o => o.tag === filter);
+    grid.innerHTML = filtered.map(o => `
+      <div class="opp-card">
+        <div class="opp-card-top">
+          <span class="opp-icon">${o.icon}</span>
+          <div style="flex:1">
+            <div class="opp-title">${o.title}</div>
+          </div>
+          <span class="opp-badge ${o.badge}">${o.badgeText}</span>
+        </div>
+        <div class="opp-desc">${o.desc}</div>
+        <div class="opp-links">
+          ${o.links.map(l => `<a href="${l.url}" target="_blank" rel="noopener">${l.text} ↗</a>`).join('')}
+        </div>
+      </div>`).join('');
+  }
+
+  function filterOpps(tag, btn) {
+    currentOppsFilter = tag;
+    document.querySelectorAll('.opps-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    renderOpps(tag);
+  }
+
+  function toggleOppsPanel() {
+    const panel = document.getElementById('oppsPanel');
+    // Close subject panel if open
+    document.getElementById('subjectPanel').classList.remove('open');
+    panel.classList.toggle('open');
+    if (panel.classList.contains('open')) renderOpps('all');
+  }
+
+  // ── Tech Skills ──
+  const SKILLS = [
+    {
+      tag:'ai', emoji:'🤖', name:'Generative AI & Prompt Engineering',
+      stag:'stag-ai', stagText:'AI',
+      desc:'Designing effective prompts for LLMs like GPT-4, Gemini, Claude. One of the fastest-growing skills in 2025.',
+      links:[
+        {url:'https://www.deeplearning.ai/short-courses/chatgpt-prompt-engineering-for-developers',text:'Free Course'},
+        {url:'https://www.google.com/search?q=prompt+engineering+jobs+2025',text:'Job Trends'}
+      ]
+    },
+    {
+      tag:'ai', emoji:'🧠', name:'Machine Learning & Deep Learning',
+      stag:'stag-ai', stagText:'AI',
+      desc:'Building neural networks with TensorFlow/PyTorch. Core skill for AI/ML engineer roles globally.',
+      links:[
+        {url:'https://www.coursera.org/specializations/machine-learning-introduction',text:'Learn ML'},
+        {url:'https://www.google.com/search?q=machine+learning+engineer+salary+2025',text:'Salary Trends'}
+      ]
+    },
+    {
+      tag:'web', emoji:'⚛️', name:'React & Next.js',
+      stag:'stag-web', stagText:'Web',
+      desc:'Most in-demand frontend framework combo. Next.js 15 with server components dominates full-stack web dev.',
+      links:[
+        {url:'https://nextjs.org/learn',text:'Learn Next.js Free'},
+        {url:'https://www.google.com/search?q=React+Next.js+developer+jobs+2025',text:'Job Market'}
+      ]
+    },
+    {
+      tag:'web', emoji:'🦀', name:'Rust & WebAssembly',
+      stag:'stag-web', stagText:'Web',
+      desc:'Rust is the most loved language 9 years running. WebAssembly enables near-native speed in browsers.',
+      links:[
+        {url:'https://www.rust-lang.org/learn',text:'Learn Rust'},
+        {url:'https://www.google.com/search?q=Rust+WebAssembly+developer+2025',text:'Explore Roles'}
+      ]
+    },
+    {
+      tag:'data', emoji:'📊', name:'Data Engineering & dbt',
+      stag:'stag-data', stagText:'Data',
+      desc:'Building data pipelines with Apache Spark, Airflow, and dbt. Highest-paying data role in 2025.',
+      links:[
+        {url:'https://www.getdbt.com/learn',text:'Learn dbt'},
+        {url:'https://www.google.com/search?q=data+engineer+skills+2025',text:'Skills Guide'}
+      ]
+    },
+    {
+      tag:'data', emoji:'🔍', name:'Vector Databases & RAG',
+      stag:'stag-data', stagText:'Data',
+      desc:'Pinecone, Weaviate, ChromaDB — powering AI apps with Retrieval-Augmented Generation pipelines.',
+      links:[
+        {url:'https://www.pinecone.io/learn',text:'Learn Vector DBs'},
+        {url:'https://www.google.com/search?q=RAG+vector+database+tutorial+2025',text:'Tutorials'}
+      ]
+    },
+    {
+      tag:'cloud', emoji:'☁️', name:'AWS / Azure / GCP Cloud',
+      stag:'stag-cloud', stagText:'Cloud',
+      desc:'Cloud certifications (AWS SAA, Azure AZ-900) are among the top-paying IT credentials globally.',
+      links:[
+        {url:'https://aws.amazon.com/training/digital',text:'AWS Free Training'},
+        {url:'https://www.google.com/search?q=cloud+certification+worth+it+2025',text:'Is It Worth It?'}
+      ]
+    },
+    {
+      tag:'cloud', emoji:'🐳', name:'Kubernetes & DevOps',
+      stag:'stag-cloud', stagText:'Cloud',
+      desc:'Container orchestration with K8s, CI/CD pipelines, Terraform. Essential for every DevOps engineer.',
+      links:[
+        {url:'https://kubernetes.io/docs/tutorials',text:'K8s Tutorials'},
+        {url:'https://www.google.com/search?q=DevOps+engineer+roadmap+2025',text:'Roadmap'}
+      ]
+    },
+    {
+      tag:'cyber', emoji:'🔐', name:'Cybersecurity & Ethical Hacking',
+      stag:'stag-cyber', stagText:'Cyber',
+      desc:'3.5 million unfilled cybersecurity jobs globally. Penetration testing and SOC analysis are critical skills.',
+      links:[
+        {url:'https://tryhackme.com',text:'Practice Free'},
+        {url:'https://www.google.com/search?q=cybersecurity+certifications+2025',text:'Top Certs'}
+      ]
+    },
+    {
+      tag:'cyber', emoji:'🛡️', name:'Zero Trust & Cloud Security',
+      stag:'stag-cyber', stagText:'Cyber',
+      desc:'Zero Trust architecture and cloud-native security are the new standard for enterprise security teams.',
+      links:[
+        {url:'https://www.google.com/search?q=zero+trust+security+course+free+2025',text:'Free Courses'},
+        {url:'https://www.google.com/search?q=cloud+security+engineer+jobs+2025',text:'Job Openings'}
+      ]
+    },
+    {
+      tag:'mobile', emoji:'📱', name:'Flutter & Cross-Platform Dev',
+      stag:'stag-mobile', stagText:'Mobile',
+      desc:'Build iOS, Android, Web and Desktop from a single Dart codebase. Flutter job postings growing 40% YoY.',
+      links:[
+        {url:'https://flutter.dev/learn',text:'Learn Flutter'},
+        {url:'https://www.google.com/search?q=Flutter+developer+jobs+2025',text:'Job Market'}
+      ]
+    },
+    {
+      tag:'mobile', emoji:'🍎', name:'Swift & iOS Development',
+      stag:'stag-mobile', stagText:'Mobile',
+      desc:"Apple's Swift with SwiftUI is the go-to for native iOS/macOS apps. High demand with Apple Vision Pro.",
+      links:[
+        {url:'https://developer.apple.com/tutorials/swiftui',text:'Apple Tutorials'},
+        {url:'https://www.google.com/search?q=iOS+developer+salary+2025',text:'Salary Data'}
+      ]
+    }
+  ];
+
+  function renderSkills(filter) {
+    const list = document.getElementById('skillsList');
+    const filtered = filter === 'all' ? SKILLS : SKILLS.filter(s => s.tag === filter);
+    list.innerHTML = filtered.map(s => `
+      <div class="skill-item">
+        <div class="skill-item-top">
+          <span class="skill-emoji">${s.emoji}</span>
+          <span class="skill-name">${s.name}</span>
+          <span class="skill-tag ${s.stag}">${s.stagText}</span>
+        </div>
+        <div class="skill-desc">${s.desc}</div>
+        <div class="skill-links">
+          ${s.links.map(l=>`<a href="${l.url}" target="_blank" rel="noopener">${l.text} ↗</a>`).join('')}
+        </div>
+      </div>`).join('');
+  }
+
+  function filterSkills(tag, btn) {
+    document.querySelectorAll('.skills-filter').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderSkills(tag);
+  }
+
+  function toggleSkillsPopup() {
+    const popup   = document.getElementById('skillsPopup');
+    const overlay = document.getElementById('skillsOverlay');
+    const isOpen  = popup.classList.contains('open');
+    popup.classList.toggle('open');
+    overlay.classList.toggle('open');
+    if (!isOpen) renderSkills('all');
+  }
+
+  // Auto-open on page load after 1s
+  window.addEventListener('load', () => setTimeout(toggleSkillsPopup, 1000));
+</script>
+</body>
+</html>
