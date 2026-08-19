@@ -93,6 +93,16 @@ These 21 prompts in order will produce the complete Digital Library website exac
 
 
 
+
+
+
+
+
+
+
+
+
+
 # Digital Library — Website Workflow
 1. Page Load
 Browser opens harshit.html
@@ -237,6 +247,13 @@ All data is LOCAL (no server/API needed)
 
 Screen width > 768px  →  Sidebar left + Main right (side by side)
 Screen width ≤ 768px  →  Sidebar stacks on top, cards wrap into rows
+
+
+
+
+
+
+
 
 
 
